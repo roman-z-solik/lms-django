@@ -11,7 +11,7 @@ class IsModerator(BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
 
-        return request.user.groups.filter(name='moderators').exists()
+        return request.user.groups.filter(name="moderators").exists()
 
 
 class IsOwner(BasePermission):
@@ -21,9 +21,11 @@ class IsOwner(BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
-        if hasattr(obj, 'owner'):
+        if hasattr(obj, "owner"):
             return obj.owner == request.user
-        return False
+        elif hasattr(obj, "user"):
+            return obj.user == request.user
+        return obj == request.user
 
 
 class IsAdminUser(BasePermission):
@@ -50,10 +52,10 @@ class IsModeratorOrReadOnly(BasePermission):
     """
 
     def has_permission(self, request, view):
-        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
             return True
 
-        return request.user.groups.filter(name='moderators').exists()
+        return request.user.groups.filter(name="moderators").exists()
 
 
 class IsOwnerOrModerator(BasePermission):
@@ -62,13 +64,14 @@ class IsOwnerOrModerator(BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
-        if request.user.groups.filter(name='moderators').exists():
+        if request.user.groups.filter(name="moderators").exists():
             return True
 
-        if hasattr(obj, 'owner'):
+        if hasattr(obj, "owner"):
             return obj.owner == request.user
-
-        return False
+        elif hasattr(obj, "user"):
+            return obj.user == request.user
+        return obj == request.user
 
 
 class IsAdminOrModerator(BasePermission):
@@ -78,9 +81,12 @@ class IsAdminOrModerator(BasePermission):
 
     def has_permission(self, request, view):
         return bool(
-            request.user and
-            request.user.is_authenticated and
-            (request.user.is_staff or request.user.groups.filter(name='moderators').exists())
+            request.user
+            and request.user.is_authenticated
+            and (
+                request.user.is_staff
+                or request.user.groups.filter(name="moderators").exists()
+            )
         )
 
 
@@ -93,7 +99,7 @@ class IsAuthenticatedAndReadOnly(BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
 
-        return request.method in ['GET', 'HEAD', 'OPTIONS']
+        return request.method in ["GET", "HEAD", "OPTIONS"]
 
 
 class IsOwnerOrModeratorForObject(BasePermission):
@@ -103,13 +109,14 @@ class IsOwnerOrModeratorForObject(BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
-        if request.user.groups.filter(name='moderators').exists():
+        if request.user.groups.filter(name="moderators").exists():
             return True
 
-        if hasattr(obj, 'owner'):
+        if hasattr(obj, "owner"):
             return obj.owner == request.user
-
-        return False
+        elif hasattr(obj, "user"):
+            return obj.user == request.user
+        return obj == request.user
 
 
 class IsNotModerator(BasePermission):
@@ -121,4 +128,20 @@ class IsNotModerator(BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
 
-        return not request.user.groups.filter(name='moderators').exists()
+        return not request.user.groups.filter(name="moderators").exists()
+
+
+class IsOwnerOrReadOnly(BasePermission):
+    """
+    Владелец может редактировать, остальные только читать
+    """
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
+            return True
+
+        if hasattr(obj, "owner"):
+            return obj.owner == request.user
+        elif hasattr(obj, "user"):
+            return obj.user == request.user
+        return obj == request.user
