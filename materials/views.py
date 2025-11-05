@@ -1,6 +1,9 @@
-from rest_framework import viewsets, permissions, generics
+from rest_framework import viewsets, generics
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
 from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
+from users.permissions import IsModerator, IsModeratorOrReadOnly
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -9,7 +12,22 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [permissions.AllowAny]  # Пока без авторизации
+
+    def get_permissions(self):
+        """
+        Разграничение прав доступа для курсов:
+        - Создание: только администраторы
+        - Удаление: только администраторы
+        - Просмотр и редактирование: администраторы и модераторы
+        """
+        if self.action == 'create':
+            permission_classes = [IsAdminUser]
+        elif self.action == 'destroy':
+            permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [IsAuthenticated, IsModerator | IsAdminUser]
+
+        return [permission() for permission in permission_classes]
 
 
 class LessonListView(generics.ListAPIView):
@@ -18,7 +36,7 @@ class LessonListView(generics.ListAPIView):
     """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsAuthenticated, IsModerator | IsAdminUser]
 
 
 class LessonRetrieveView(generics.RetrieveAPIView):
@@ -27,7 +45,7 @@ class LessonRetrieveView(generics.RetrieveAPIView):
     """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsAuthenticated, IsModerator | IsAdminUser]
 
 
 class LessonCreateView(generics.CreateAPIView):
@@ -36,7 +54,7 @@ class LessonCreateView(generics.CreateAPIView):
     """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsAdminUser]
 
 
 class LessonUpdateView(generics.UpdateAPIView):
@@ -45,7 +63,7 @@ class LessonUpdateView(generics.UpdateAPIView):
     """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsAuthenticated, IsModerator | IsAdminUser]
 
 
 class LessonDestroyView(generics.DestroyAPIView):
@@ -54,4 +72,4 @@ class LessonDestroyView(generics.DestroyAPIView):
     """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsAdminUser]
