@@ -1,51 +1,39 @@
 from django.contrib import admin
-from django.contrib.auth.admin import GroupAdmin
-from django.contrib.auth.models import Group
 from .models import Course, Lesson
 
 
 class LessonInline(admin.TabularInline):
     model = Lesson
     extra = 1
-    fields = ('title', 'description', 'video_url', 'preview')
+    fields = ('title', 'description', 'video_url', 'preview', 'owner', 'course')
+    readonly_fields = ('owner',)
 
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'created_at', 'updated_at')
-    list_filter = ('created_at', 'updated_at')
-    search_fields = ('title', 'description')
+    list_display = ('title', 'owner', 'created_at', 'updated_at')
+    list_filter = ('created_at', 'updated_at', 'owner')
+    search_fields = ('title', 'description', 'owner__email')
     inlines = [LessonInline]
+    readonly_fields = ('owner',)
+
+    def save_model(self, request, obj, form, change):
+        """Автоматически устанавливаем владельца при создании"""
+        if not obj.pk:
+            obj.owner = request.user
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ('title', 'course', 'created_at', 'updated_at')
-    list_filter = ('course', 'created_at', 'updated_at')
-    search_fields = ('title', 'description', 'course__title')
+    list_display = ('title', 'course', 'owner', 'created_at', 'updated_at')
+    list_filter = ('course', 'created_at', 'updated_at', 'owner')
+    search_fields = ('title', 'description', 'course__title', 'owner__email')
     raw_id_fields = ('course',)
+    readonly_fields = ('owner',)
 
-
-admin.site.unregister(Group)
-
-
-@admin.register(Group)
-class CustomGroupAdmin(GroupAdmin):
-    """
-    Кастомная админка для групп с дополнительной информацией
-    """
-    list_display = ('name', 'get_user_count', 'get_permissions_count')
-    list_filter = ('name',)
-    search_fields = ('name',)
-
-    def get_user_count(self, obj):
-        """Количество пользователей в группе"""
-        return obj.user_set.count()
-
-    get_user_count.short_description = 'Количество пользователей'
-
-    def get_permissions_count(self, obj):
-        """Количество разрешений в группе"""
-        return obj.permissions.count()
-
-    get_permissions_count.short_description = 'Количество разрешений'
+    def save_model(self, request, obj, form, change):
+        """Автоматически устанавливаем владельца при создании"""
+        if not obj.pk:
+            obj.owner = request.user
+        super().save_model(request, obj, form, change)

@@ -2,8 +2,6 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from materials.models import Course, Lesson
-
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -71,7 +69,7 @@ class Payment(models.Model):
         auto_now_add=True
     )
     paid_course = models.ForeignKey(
-        Course,
+        'materials.Course',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -79,7 +77,7 @@ class Payment(models.Model):
         verbose_name=_('оплаченный курс')
     )
     paid_lesson = models.ForeignKey(
-        Lesson,
+        'materials.Lesson',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

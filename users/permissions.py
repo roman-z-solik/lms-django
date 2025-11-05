@@ -21,7 +21,9 @@ class IsOwner(BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
+        if hasattr(obj, 'owner'):
+            return obj.owner == request.user
+        return False
 
 
 class IsAdminUser(BasePermission):
@@ -63,13 +65,8 @@ class IsOwnerOrModerator(BasePermission):
         if request.user.groups.filter(name='moderators').exists():
             return True
 
-        if hasattr(obj, 'user'):
-            return obj.user == request.user
-
         if hasattr(obj, 'owner'):
             return obj.owner == request.user
-        if hasattr(obj, 'author'):
-            return obj.author == request.user
 
         return False
 
@@ -97,3 +94,31 @@ class IsAuthenticatedAndReadOnly(BasePermission):
             return False
 
         return request.method in ['GET', 'HEAD', 'OPTIONS']
+
+
+class IsOwnerOrModeratorForObject(BasePermission):
+    """
+    Владелец или модератор могут работать с объектом
+    Для операций с конкретным объектом
+    """
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.groups.filter(name='moderators').exists():
+            return True
+
+        if hasattr(obj, 'owner'):
+            return obj.owner == request.user
+
+        return False
+
+
+class IsNotModerator(BasePermission):
+    """
+    Пользователь НЕ является модератором
+    """
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        return not request.user.groups.filter(name='moderators').exists()

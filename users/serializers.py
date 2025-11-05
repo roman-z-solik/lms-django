@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.db.models import Sum
-from .models import User, Payment
-from materials.models import Course, Lesson
+from .models import Payment, User
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -10,7 +9,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
 
-        # Добавление пользовательских полей в токен
         token['email'] = user.email
         token['first_name'] = user.first_name
         token['last_name'] = user.last_name

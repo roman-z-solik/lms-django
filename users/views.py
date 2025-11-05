@@ -13,9 +13,11 @@ from users.serializers import (
     UserSerializer, UserRegisterSerializer, MyTokenObtainPairSerializer
 )
 
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
     permission_classes = [AllowAny]
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """ViewSet для CRUD операций с пользователями"""
@@ -23,11 +25,13 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
+
 class UserRegisterView(generics.CreateAPIView):
     """Регистрация нового пользователя"""
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
+
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     """Профиль текущего пользователя"""
@@ -36,6 +40,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
 
 class PaymentViewSet(viewsets.ModelViewSet):
     """
@@ -47,7 +52,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = PaymentFilter
     ordering_fields = ['payment_date', 'amount']
-    ordering = ['-payment_date']  # Сортировка по умолчанию: новые платежи first
+    ordering = ['-payment_date']
+
 
 class UserPaymentHistoryView(generics.RetrieveAPIView):
     """
@@ -57,6 +63,7 @@ class UserPaymentHistoryView(generics.RetrieveAPIView):
     serializer_class = UserPaymentHistorySerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'id'
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
