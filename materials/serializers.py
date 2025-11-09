@@ -56,7 +56,7 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ['course_id']
+        fields = ["course_id"]
 
     def create(self, validated_data):
         return validated_data

@@ -171,8 +171,7 @@ class PaymentCreateView(generics.CreateAPIView):
                 print(f"Course: {course.title}, Price: {course.price}")
             except Course.DoesNotExist:
                 return Response(
-                    {"error": "Курс не найден"},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {"error": "Курс не найден"}, status=status.HTTP_400_BAD_REQUEST
                 )
 
             existing_payment = Payment.objects.filter(
@@ -281,6 +280,7 @@ class PaymentCancelView(generics.GenericAPIView):
     """
     Страница отмены оплаты (для редиректа из Stripe)
     """
+
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
