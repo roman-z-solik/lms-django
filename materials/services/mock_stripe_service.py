@@ -48,11 +48,22 @@ class RealStripeService:
 
     def __init__(self):
         if not getattr(settings, 'STRIPE_SECRET_KEY', None):
-            raise Exception("STRIPE_SECRET_KEY не настроен")
+            raise Exception("STRIPE_SECRET_KEY не настроен в .env файле")
 
-        # Настройка Stripe
         stripe.api_key = settings.STRIPE_SECRET_KEY
-        print("✅ Real Stripe Service initialized")
+
+        self._validate_api_key()
+        print("✅ Using Real Stripe Service")
+
+    def _validate_api_key(self):
+        """Проверка валидности API ключа"""
+        try:
+            stripe.Balance.retrieve()
+            print("✅ Stripe API Key is valid")
+        except stripe.error.AuthenticationError:
+            raise Exception("Неверный Stripe API ключ")
+        except Exception as e:
+            print(f"⚠️  Stripe API check warning: {str(e)}")
 
     def create_product(self, name, description=None):
         """Создание продукта в Stripe"""
@@ -66,8 +77,12 @@ class RealStripeService:
             print(f"✅ Product created: {product.id}")
             return product
 
+        except stripe.error.StripeError as e:
+            error_msg = f"Stripe Error: {e.user_message if e.user_message else str(e)}"
+            print(f"❌ {error_msg}")
+            raise Exception(error_msg)
         except Exception as e:
-            error_msg = f"Stripe Error: {str(e)}"
+            error_msg = f"Unexpected error: {str(e)}"
             print(f"❌ {error_msg}")
             raise Exception(error_msg)
 
@@ -87,8 +102,12 @@ class RealStripeService:
             print(f"✅ Price created: {price.id}")
             return price
 
+        except stripe.error.StripeError as e:
+            error_msg = f"Stripe Error: {e.user_message if e.user_message else str(e)}"
+            print(f"❌ {error_msg}")
+            raise Exception(error_msg)
         except Exception as e:
-            error_msg = f"Stripe Error: {str(e)}"
+            error_msg = f"Unexpected error: {str(e)}"
             print(f"❌ {error_msg}")
             raise Exception(error_msg)
 
@@ -111,8 +130,12 @@ class RealStripeService:
             print(f"✅ Payment URL: {session.url}")
             return session
 
+        except stripe.error.StripeError as e:
+            error_msg = f"Stripe Error: {e.user_message if e.user_message else str(e)}"
+            print(f"❌ {error_msg}")
+            raise Exception(error_msg)
         except Exception as e:
-            error_msg = f"Stripe Error: {str(e)}"
+            error_msg = f"Unexpected error: {str(e)}"
             print(f"❌ {error_msg}")
             raise Exception(error_msg)
 
@@ -121,7 +144,7 @@ class RealStripeService:
         try:
             session = stripe.checkout.Session.retrieve(session_id)
             return session
-        except Exception as e:
+        except stripe.error.StripeError as e:
             raise Exception(f"Ошибка получения статуса сессии: {str(e)}")
 
 
@@ -129,46 +152,21 @@ class StripeService:
     """Умный сервис для работы с платежами"""
 
     def __init__(self):
-        self.service = None
-        self._initialize_service()
-
-    def _initialize_service(self):
-        """Инициализация сервиса с автоматическим выбором"""
         try:
             self.service = RealStripeService()
-            print("🚀 Testing Real Stripe API...")
-            stripe.Balance.retrieve()  # Простой запрос для проверки
-            print("✅ Stripe Service: Real Stripe API подключен и работает")
-            return
+            print("🚀 Stripe Service: Real Stripe API подключен")
         except Exception as e:
-            print(f"⚠️  Real Stripe недоступен: {str(e)}")
-
-        print("🔧 Stripe Service: Используется Mock Service")
-        self.service = MockStripeService()
+            self.service = MockStripeService()
+            print(f"🔧 Stripe Service: Используется Mock Service - {str(e)}")
 
     def create_product(self, name, description=None):
-        try:
-            return self.service.create_product(name, description)
-        except Exception:
-            print("🔄 Переключаемся на Mock Service после ошибки")
-            self.service = MockStripeService()
-            return self.service.create_product(name, description)
+        return self.service.create_product(name, description)
 
     def create_price(self, product_id, amount, currency='rub'):
-        try:
-            return self.service.create_price(product_id, amount, currency)
-        except Exception:
-            print("🔄 Переключаемся на Mock Service после ошибки")
-            self.service = MockStripeService()
-            return self.service.create_price(product_id, amount, currency)
+        return self.service.create_price(product_id, amount, currency)
 
     def create_checkout_session(self, price_id, success_url, cancel_url):
-        try:
-            return self.service.create_checkout_session(price_id, success_url, cancel_url)
-        except Exception:
-            print("🔄 Переключаемся на Mock Service после ошибки")
-            self.service = MockStripeService()
-            return self.service.create_checkout_session(price_id, success_url, cancel_url)
+        return self.service.create_checkout_session(price_id, success_url, cancel_url)
 
     def get_session_status(self, session_id):
         return self.service.get_session_status(session_id)

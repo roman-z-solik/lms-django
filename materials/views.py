@@ -8,7 +8,7 @@ from .serializers import (
     PaymentSerializer,
     PaymentCreateSerializer,
 )
-from .services.stripe_service import StripeService
+from .services.stripe_service import stripe_service
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -71,6 +71,82 @@ class LessonDestroyView(generics.DestroyAPIView):
     permission_classes = [permissions.AllowAny]
 
 
+# class PaymentCreateView(generics.CreateAPIView):
+#     """
+#     Создание платежа для курса
+#     """
+#
+#     queryset = Payment.objects.all()
+#     serializer_class = PaymentCreateSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+#
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#
+#         course_id = serializer.validated_data["course_id"]
+#         user = request.user
+#
+#         try:
+#             course = Course.objects.get(id=course_id)
+#         except Course.DoesNotExist:
+#             return Response(
+#                 {"error": "Курс не найден"},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+#
+#         existing_payment = Payment.objects.filter(
+#             user=user,
+#             course=course,
+#             status__in=[Payment.Status.PENDING, Payment.Status.PROCESSING],
+#         ).first()
+#
+#         if existing_payment:
+#             return Response(
+#                 {"detail": "Активный платеж для этого курса уже существует"},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+#
+#         try:
+#             product = stripe_service.create_product(
+#                 name=course.title, description=course.description
+#             )
+#
+#             price = stripe_service.create_price(
+#                 product_id=product.id, amount=course.price
+#             )
+#
+#             success_url = request.build_absolute_uri(
+#                 reverse("payment-success", kwargs={"pk": "CHECKOUT_SESSION_ID"})
+#             )
+#             cancel_url = request.build_absolute_uri(reverse("payment-cancel"))
+#
+#             success_url = success_url.replace(
+#                 "CHECKOUT_SESSION_ID", "{CHECKOUT_SESSION_ID}"
+#             )
+#
+#             session = stripe_service.create_checkout_session(
+#                 price_id=price.id, success_url=success_url, cancel_url=cancel_url
+#             )
+#
+#             payment = Payment.objects.create(
+#                 user=user,
+#                 course=course,
+#                 amount=course.price,
+#                 stripe_product_id=product.id,
+#                 stripe_price_id=price.id,
+#                 stripe_session_id=session.id,
+#                 payment_url=session.url,
+#                 status=Payment.Status.PENDING,
+#             )
+#
+#             response_serializer = PaymentSerializer(payment)
+#             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+#
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class PaymentCreateView(generics.CreateAPIView):
     """
     Создание платежа для курса
@@ -81,30 +157,42 @@ class PaymentCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        course = serializer.validated_data["course"]
-        user = request.user
-
-        existing_payment = Payment.objects.filter(
-            user=user,
-            course=course,
-            status__in=[Payment.Status.PENDING, Payment.Status.PROCESSING],
-        ).first()
-
-        if existing_payment:
-            return Response(
-                {"detail": "Активный платеж для этого курса уже существует"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         try:
-            product = StripeService.create_product(
+            print("=== Payment Create Started ===")
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            course_id = serializer.validated_data["course_id"]
+            user = request.user
+
+            # Получаем объект курса из базы данных
+            try:
+                course = Course.objects.get(id=course_id)
+                print(f"Course: {course.title}, Price: {course.price}")
+            except Course.DoesNotExist:
+                return Response(
+                    {"error": "Курс не найден"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            existing_payment = Payment.objects.filter(
+                user=user,
+                course=course,
+                status__in=[Payment.Status.PENDING, Payment.Status.PROCESSING],
+            ).first()
+
+            if existing_payment:
+                return Response(
+                    {"detail": "Активный платеж для этого курса уже существует"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            print("Creating Stripe objects...")
+            product = stripe_service.create_product(
                 name=course.title, description=course.description
             )
 
-            price = StripeService.create_price(
+            price = stripe_service.create_price(
                 product_id=product.id, amount=course.price
             )
 
@@ -117,7 +205,7 @@ class PaymentCreateView(generics.CreateAPIView):
                 "CHECKOUT_SESSION_ID", "{CHECKOUT_SESSION_ID}"
             )
 
-            session = StripeService.create_checkout_session(
+            session = stripe_service.create_checkout_session(
                 price_id=price.id, success_url=success_url, cancel_url=cancel_url
             )
 
@@ -133,9 +221,11 @@ class PaymentCreateView(generics.CreateAPIView):
             )
 
             response_serializer = PaymentSerializer(payment)
+            print("=== Payment Create Success ===")
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
+            print(f"=== ERROR: {str(e)} ===")
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -155,7 +245,7 @@ class PaymentStatusView(generics.RetrieveAPIView):
         payment = self.get_object()
 
         try:
-            session = StripeService.get_session_status(payment.stripe_session_id)
+            session = stripe_service.get_session_status(payment.stripe_session_id)
 
             if session.payment_status == "paid":
                 payment.status = Payment.Status.SUCCEEDED
@@ -191,7 +281,7 @@ class PaymentCancelView(generics.GenericAPIView):
     """
     Страница отмены оплаты (для редиректа из Stripe)
     """
-
+    serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):

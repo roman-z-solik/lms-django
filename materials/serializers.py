@@ -52,10 +52,11 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 
 class PaymentCreateSerializer(serializers.ModelSerializer):
-    course_id = serializers.PrimaryKeyRelatedField(
-        queryset=Course.objects.all(), source="course", write_only=True
-    )
+    course_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Payment
-        fields = ["course_id"]
+        fields = ['course_id']
+
+    def create(self, validated_data):
+        return validated_data
