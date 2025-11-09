@@ -6,9 +6,9 @@
 ![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)  
 ![Poetry](https://img.shields.io/badge/Poetry-%233B82F6.svg?style=for-the-badge&logo=poetry&logoColor=0B3D8D)  
 ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green)  
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
 - **Stripe API** для платежей  
-- **drf-yasg** для документации API  
-- **JWT Authentication**  
+- **drf-yasg** для документации API   
 
 
 ## Использование
@@ -64,13 +64,19 @@
 `python manage.py runserver`
 
 ### Требования
-Для установки и запуска проекта, необходимы:
+Для установки и запуска проекта, необходимы:  
 ![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
-https://www.python.org/
+https://www.python.org/  
 ![Pycharm](https://img.shields.io/badge/PyCharm-000000.svg?&style=for-the-badge&logo=PyCharm&logoColor=white)
-https://www.jetbrains.com/pycharm/
+https://www.jetbrains.com/pycharm/  
 ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green)
-https://www.djangoproject.com/
+https://www.djangoproject.com/  
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+https://www.jwt.io/  
+[Stripe API]
+https://stripe.com/docs/api  
+[drf-yasg]
+https://drf-yasg.readthedocs.io/en/stable/
 
 
 ## Команда проекта
