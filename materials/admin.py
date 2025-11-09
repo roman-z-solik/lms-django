@@ -1,10 +1,12 @@
 from django.contrib import admin
 from .models import Course, Lesson
 
+
 class LessonInline(admin.TabularInline):
     model = Lesson
     extra = 1
     fields = ('title', 'description', 'video_url', 'preview')
+
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
@@ -13,9 +15,18 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description')
     inlines = [LessonInline]
 
+    class Meta:
+        verbose_name = 'Курс'
+        verbose_name_plural = 'Курсы'
+
+
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     list_display = ('title', 'course', 'created_at', 'updated_at')
     list_filter = ('course', 'created_at', 'updated_at')
     search_fields = ('title', 'description', 'course__title')
     raw_id_fields = ('course',)
+
+    class Meta:
+        verbose_name = 'Урок'
+        verbose_name_plural = 'Уроки'

@@ -10,8 +10,8 @@ class Course(models.Model):
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
 
     class Meta:
-        verbose_name = _('course')
-        verbose_name_plural = _('courses')
+        verbose_name = 'Курс'
+        verbose_name_plural = 'Курсы'
         ordering = ['-created_at']
 
     def __str__(self):
@@ -33,8 +33,8 @@ class Lesson(models.Model):
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
 
     class Meta:
-        verbose_name = _('lesson')
-        verbose_name_plural = _('lessons')
+        verbose_name = 'Урок'
+        verbose_name_plural = 'Уроки'
         ordering = ['created_at']
 
     def __str__(self):
