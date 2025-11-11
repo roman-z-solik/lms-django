@@ -75,4 +75,3 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return validated_data
-      

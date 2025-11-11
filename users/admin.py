@@ -79,4 +79,3 @@ class CustomGroupAdmin(GroupAdmin):
         return obj.permissions.count()
 
     get_permissions_count.short_description = "Количество разрешений"
-    
