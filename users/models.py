@@ -41,74 +41,9 @@ class User(AbstractUser):
     objects = UserManager()
 
     class Meta:
-        verbose_name = _("user")
-        verbose_name_plural = _("users")
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
 
     def __str__(self):
         return self.email
-
-
-class Payment(models.Model):
-    """
-    Модель платежей (Задание 2)
-    """
-
-    PAYMENT_METHOD_CASH = "cash"
-    PAYMENT_METHOD_TRANSFER = "transfer"
-
-    PAYMENT_METHOD_CHOICES = [
-        (PAYMENT_METHOD_CASH, "Наличные"),
-        (PAYMENT_METHOD_TRANSFER, "Перевод на счет"),
-    ]
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="payments",
-        verbose_name=_("пользователь"),
-    )
-    payment_date = models.DateTimeField(_("дата оплаты"), auto_now_add=True)
-    paid_course = models.ForeignKey(
-        "materials.Course",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="payments",
-        verbose_name=_("оплаченный курс"),
-    )
-    paid_lesson = models.ForeignKey(
-        "materials.Lesson",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="payments",
-        verbose_name=_("оплаченный урок"),
-    )
-    amount = models.DecimalField(_("сумма оплаты"), max_digits=10, decimal_places=2)
-    payment_method = models.CharField(
-        _("способ оплаты"),
-        max_length=20,
-        choices=PAYMENT_METHOD_CHOICES,
-        default=PAYMENT_METHOD_TRANSFER,
-    )
-
-    class Meta:
-        verbose_name = _("платеж")
-        verbose_name_plural = _("платежи")
-        ordering = ["-payment_date"]
-
-    def __str__(self):
-        return f"Платеж {self.user.email} - {self.amount} руб."
-
-    def clean(self):
-        """
-        Валидация: нельзя оплатить и курс и урок одновременно
-        """
-        from django.core.exceptions import ValidationError
-
-        if self.paid_course and self.paid_lesson:
-            raise ValidationError(
-                "Нельзя оплатить одновременно и курс и урок. Выберите что-то одно."
-            )
-        if not self.paid_course and not self.paid_lesson:
-            raise ValidationError("Необходимо указать либо курс, либо урок для оплаты.")
+      

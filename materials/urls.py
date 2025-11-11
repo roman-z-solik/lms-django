@@ -7,6 +7,13 @@ from .views import (
     LessonCreateView,
     LessonUpdateView,
     LessonDestroyView,
+    PaymentCreateView,
+    PaymentStatusView,
+    PaymentSuccessView,
+    PaymentCancelView,
+    SubscriptionListView,
+    SubscriptionCreateView,
+    SubscriptionDestroyView,
 )
 
 router = DefaultRouter()
@@ -19,4 +26,17 @@ urlpatterns = [
     path("lessons/<int:pk>/", LessonRetrieveView.as_view(), name="lesson-detail"),
     path("lessons/<int:pk>/update/", LessonUpdateView.as_view(), name="lesson-update"),
     path("lessons/<int:pk>/delete/", LessonDestroyView.as_view(), name="lesson-delete"),
+    path("payments/create/", PaymentCreateView.as_view(), name="payment-create"),
+    path(
+        "payments/<int:pk>/status/", PaymentStatusView.as_view(), name="payment-status"
+    ),
+    path(
+        "payments/success/<str:pk>/",
+        PaymentSuccessView.as_view(),
+        name="payment-success",
+    ),
+    path("payments/cancel/", PaymentCancelView.as_view(), name="payment-cancel"),
+    path('subscriptions/', SubscriptionListView.as_view(), name='subscription-list'),
+    path('subscriptions/create/', SubscriptionCreateView.as_view(), name='subscription-create'),
+    path('subscriptions/delete/<int:pk>/', SubscriptionDestroyView.as_view(), name='subscription-delete'),
 ]

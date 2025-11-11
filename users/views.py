@@ -5,12 +5,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
 from rest_framework_simplejwt.views import TokenObtainPairView
+from drf_yasg.utils import swagger_auto_schema
 
-from users.filters import PaymentFilter
-from users.models import Payment, User
+from users.models import User
 from users.serializers import (
-    PaymentSerializer,
-    UserPaymentHistorySerializer,
     UserSerializer,
     UserRegisterSerializer,
     MyTokenObtainPairSerializer,
@@ -60,34 +58,19 @@ class UserDetailView(generics.RetrieveAPIView):
     lookup_field = "id"
 
 
-class PaymentViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet для CRUD операций с платежами (Задание 4)
-    """
-
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_class = PaymentFilter
-    ordering_fields = ["payment_date", "amount"]
-    ordering = ["-payment_date"]
-
-
-class UserPaymentHistoryView(generics.RetrieveAPIView):
-    """
-    API для получения истории платежей пользователя (Дополнительное задание)
-    """
-
-    queryset = User.objects.all()
-    serializer_class = UserPaymentHistorySerializer
-    permission_classes = [IsAuthenticated, IsOwner]
-    lookup_field = "id"
-
-
+@swagger_auto_schema(
+    method="get",
+    operation_description="Получение корневой страницы API со списком доступных эндпоинтов",
+    operation_summary="Корневой эндпоинт API",
+    tags=["API"],
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def api_root(request):
+    """
+    Корневой эндпоинт API LMS платформы.
+    Возвращает список доступных эндпоинтов системы.
+    """
     return Response(
         {
             "message": "Добро пожаловать в LMS API!",
@@ -98,12 +81,15 @@ def api_root(request):
                 "my_profile": "/api/users/profile/",
                 "user_detail": "/api/users/users/{id}/",
                 "users": "/api/users/users/",
-                "payments": "/api/users/payments/",
-                "user_payment_history": "/api/users/users/{id}/payment-history/",
                 "courses": "/api/materials/courses/",
                 "lessons": "/api/materials/lessons/",
+                "payments": "/api/materials/payments/",
+                "subscriptions": "/api/materials/subscriptions/",
                 "admin": "/admin/",
                 "api_auth": "/api-auth/",
+                "swagger_docs": "/swagger/",
+                "redoc_docs": "/redoc/",
             },
         }
     )
+  

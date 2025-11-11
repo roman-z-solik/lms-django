@@ -1,22 +1,24 @@
 from django.contrib import admin
-from django.contrib.auth.admin import GroupAdmin
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.contrib.auth.models import Group
-from .models import User, Payment
+from .models import User
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class CustomUserAdmin(UserAdmin):
     list_display = ("email", "first_name", "last_name", "phone", "city", "is_staff")
     list_filter = ("is_staff", "is_superuser", "is_active", "city")
     search_fields = ("email", "first_name", "last_name", "phone")
+    ordering = ("email",)
+
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         (
-            "Personal info",
+            "Персональная информация",
             {"fields": ("first_name", "last_name", "phone", "city", "avatar")},
         ),
         (
-            "Permissions",
+            "Права доступа",
             {
                 "fields": (
                     "is_active",
@@ -27,23 +29,30 @@ class UserAdmin(admin.ModelAdmin):
                 )
             },
         ),
-        ("Important dates", {"fields": ("last_login", "date_joined")}),
+        ("Важные даты", {"fields": ("last_login", "date_joined")}),
     )
 
-
-@admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
-    list_display = (
-        "user",
-        "amount",
-        "payment_method",
-        "payment_date",
-        "paid_course",
-        "paid_lesson",
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "email",
+                    "password1",
+                    "password2",
+                    "first_name",
+                    "last_name",
+                    "phone",
+                    "city",
+                ),
+            },
+        ),
     )
-    list_filter = ("payment_method", "payment_date")
-    search_fields = ("user__email", "paid_course__title", "paid_lesson__title")
-    raw_id_fields = ("user", "paid_course", "paid_lesson")
+
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
 
 
 admin.site.unregister(Group)
@@ -70,3 +79,4 @@ class CustomGroupAdmin(GroupAdmin):
         return obj.permissions.count()
 
     get_permissions_count.short_description = "Количество разрешений"
+    
