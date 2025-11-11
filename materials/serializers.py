@@ -14,9 +14,24 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = "__all__"
+        fields = [
+            "id",
+            "title",
+            "preview",
+            "description",
+            "price",
+            "owner",
+            "created_at",
+            "updated_at",
+            "lessons_count",
+            "lessons",
+        ]
 
     def get_lessons_count(self, obj):
+        """
+        Метод для получения количества уроков в курсе.
+        obj - экземпляр модели Course
+        """
         return obj.lessons.count()
 
 
@@ -60,3 +75,4 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return validated_data
+      

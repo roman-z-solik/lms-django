@@ -25,72 +25,71 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("password", models.CharField(max_length=128, verbose_name="password")),
+                ("password", models.CharField(max_length=128, verbose_name="пароль")),
                 (
                     "last_login",
                     models.DateTimeField(
-                        blank=True, null=True, verbose_name="last login"
+                        blank=True, null=True, verbose_name="последний вход"
                     ),
                 ),
                 (
                     "is_superuser",
                     models.BooleanField(
                         default=False,
-                        help_text="Designates that this user has all permissions without explicitly assigning them.",
-                        verbose_name="superuser status",
+                        help_text="Указывает, что у этого пользователя есть все разрешения без их явного назначения.",
+                        verbose_name="статус суперпользователя",
                     ),
                 ),
                 (
                     "first_name",
                     models.CharField(
-                        blank=True, max_length=150, verbose_name="first name"
+                        blank=True, max_length=150, verbose_name="имя"
                     ),
                 ),
                 (
                     "last_name",
                     models.CharField(
-                        blank=True, max_length=150, verbose_name="last name"
+                        blank=True, max_length=150, verbose_name="фамилия"
                     ),
                 ),
                 (
                     "is_staff",
                     models.BooleanField(
                         default=False,
-                        help_text="Designates whether the user can log into this admin site.",
-                        verbose_name="staff status",
+                        help_text="Определяет, может ли пользователь войти на этот сайт администратора.",
+                        verbose_name="статус сотрудника",
                     ),
                 ),
                 (
                     "is_active",
                     models.BooleanField(
                         default=True,
-                        help_text="Designates whether this user should be treated as active. "
-                        "Unselect this instead of deleting accounts.",
-                        verbose_name="active",
+                        help_text="Определяет, следует ли считать этого пользователя активным. Снимите этот флажок вместо удаления учетных записей.",
+                        verbose_name="активный",
                     ),
                 ),
                 (
                     "date_joined",
                     models.DateTimeField(
-                        default=django.utils.timezone.now, verbose_name="date joined"
+                        default=django.utils.timezone.now, verbose_name="дата регистрации"
                     ),
                 ),
                 (
                     "email",
                     models.EmailField(
-                        max_length=254, unique=True, verbose_name="email address"
+                        max_length=254, unique=True, verbose_name="email адрес"
                     ),
                 ),
                 (
                     "phone",
                     models.CharField(
-                        blank=True, max_length=15, null=True, verbose_name="phone"
+                        blank=True, max_length=15, null=True, verbose_name="телефон"
                     ),
                 ),
                 (
                     "city",
                     models.CharField(
-                        blank=True, max_length=100, null=True, verbose_name="city"
+                        blank=True, max_length=100, null=True, verbose_name="город"
                     ),
                 ),
                 (
@@ -99,36 +98,36 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         upload_to="users/avatars/",
-                        verbose_name="avatar",
+                        verbose_name="аватар",
                     ),
                 ),
                 (
                     "groups",
                     models.ManyToManyField(
                         blank=True,
-                        help_text="The groups this user belongs to. A user will get "
-                        "all permissions granted to each of their groups.",
+                        help_text="Группы, к которым принадлежит этот пользователь. Пользователь получит все разрешения, предоставленные каждой из своих групп.",
                         related_name="user_set",
                         related_query_name="user",
                         to="auth.group",
-                        verbose_name="groups",
+                        verbose_name="группы",
                     ),
                 ),
                 (
                     "user_permissions",
                     models.ManyToManyField(
                         blank=True,
-                        help_text="Specific permissions for this user.",
+                        help_text="Конкретные разрешения для этого пользователя.",
                         related_name="user_set",
                         related_query_name="user",
                         to="auth.permission",
-                        verbose_name="user permissions",
+                        verbose_name="права пользователя",
                     ),
                 ),
             ],
             options={
-                "verbose_name": "user",
-                "verbose_name_plural": "users",
+                "verbose_name": "пользователь",
+                "verbose_name_plural": "пользователи",
             },
         ),
     ]
+    

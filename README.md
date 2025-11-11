@@ -1,4 +1,4 @@
-﻿# 8. Django REST Framework #
+# 8. Django REST Framework #
 
 Система управления обучением (LMS) с интеграцией платежной системы Stripe для продажи курсов.
 

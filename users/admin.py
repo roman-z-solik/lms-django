@@ -1,5 +1,6 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.contrib.auth.models import Group
 from .models import User
 
 
@@ -52,3 +53,30 @@ class CustomUserAdmin(UserAdmin):
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
+
+
+admin.site.unregister(Group)
+
+
+@admin.register(Group)
+class CustomGroupAdmin(GroupAdmin):
+    """
+    Кастомная админка для групп с дополнительной информацией
+    """
+
+    list_display = ("name", "get_user_count", "get_permissions_count")
+    list_filter = ("name",)
+    search_fields = ("name",)
+
+    def get_user_count(self, obj):
+        """Количество пользователей в группе"""
+        return obj.user_set.count()
+
+    get_user_count.short_description = "Количество пользователей"
+
+    def get_permissions_count(self, obj):
+        """Количество разрешений в группе"""
+        return obj.permissions.count()
+
+    get_permissions_count.short_description = "Количество разрешений"
+    
