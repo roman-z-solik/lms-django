@@ -294,3 +294,4 @@ class ValidatorStructureTestCase(TestCase):
         self.assertTrue(hasattr(validator, "__fields__"))
         self.assertEqual(validator.__fields__, ["video_url"])
         self.assertIsInstance(validator.__fields__, list)
+        
