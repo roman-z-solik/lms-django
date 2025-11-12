@@ -7,6 +7,7 @@ class Course(models.Model):
     """
     Модель курса.
     """
+
     title = models.CharField(_("title"), max_length=255)
     preview = models.ImageField(
         _("preview"), upload_to="courses/previews/", blank=True, null=True
@@ -39,6 +40,7 @@ class Lesson(models.Model):
     """
     Модель урока.
     """
+
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
@@ -75,8 +77,10 @@ class Payment(models.Model):
     """
     Модель платежа для оплаты курсов через Stripe.
     """
+
     class Status(models.TextChoices):
         """Статусы платежа."""
+
         PENDING = "pending", _("Ожидает оплаты")
         PROCESSING = "processing", _("Обрабатывается")
         SUCCEEDED = "succeeded", _("Оплачен")
@@ -124,4 +128,32 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Платеж {self.id} - {self.user.email} - {self.amount}"
-      
+
+
+class Subscription(models.Model):
+    """
+    Модель подписки на обновления курса.
+    """
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+        verbose_name=_("пользователь"),
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+        verbose_name=_("курс"),
+    )
+    subscribed_at = models.DateTimeField(_("дата подписки"), auto_now_add=True)
+    is_active = models.BooleanField(_("активна"), default=True)
+
+    class Meta:
+        verbose_name = _("подписка")
+        verbose_name_plural = _("подписки")
+        unique_together = ["user", "course"]
+
+    def __str__(self):
+        return f"{self.user.email} - {self.course.title}"

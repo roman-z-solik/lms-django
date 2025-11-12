@@ -36,7 +36,15 @@ urlpatterns = [
         name="payment-success",
     ),
     path("payments/cancel/", PaymentCancelView.as_view(), name="payment-cancel"),
-    path('subscriptions/', SubscriptionListView.as_view(), name='subscription-list'),
-    path('subscriptions/create/', SubscriptionCreateView.as_view(), name='subscription-create'),
-    path('subscriptions/delete/<int:pk>/', SubscriptionDestroyView.as_view(), name='subscription-delete'),
+    path("subscriptions/", SubscriptionListView.as_view(), name="subscription-list"),
+    path(
+        "subscriptions/create/",
+        SubscriptionCreateView.as_view(),
+        name="subscription-create",
+    ),
+    path(
+        "subscriptions/delete/<int:pk>/",
+        SubscriptionDestroyView.as_view(),
+        name="subscription-delete",
+    ),
 ]

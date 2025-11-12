@@ -60,4 +60,3 @@ class PaymentAdmin(admin.ModelAdmin):
     class Meta:
         verbose_name = "Платеж"
         verbose_name_plural = "Платежи"
-        

@@ -7,9 +7,10 @@ from .serializers import (
     LessonSerializer,
     PaymentSerializer,
     PaymentCreateSerializer,
-    SubscriptionSerializer
+    SubscriptionSerializer,
 )
 from .services.stripe_service import stripe_service
+from .tasks import send_course_update_notification, send_lesson_update_notification
 from users.permissions import IsOwner, IsOwnerOrModerator, IsNotModerator
 
 
@@ -31,15 +32,26 @@ class CourseViewSet(viewsets.ModelViewSet):
         if self.action == "create":
             permission_classes = [permissions.IsAuthenticated, IsNotModerator]
         elif self.action == "destroy":
-            permission_classes = [permissions.IsAuthenticated, IsOwner | permissions.IsAdminUser]
+            permission_classes = [
+                permissions.IsAuthenticated,
+                IsOwner | permissions.IsAdminUser,
+            ]
         else:
-            permission_classes = [permissions.IsAuthenticated, IsOwnerOrModerator | permissions.IsAdminUser]
+            permission_classes = [
+                permissions.IsAuthenticated,
+                IsOwnerOrModerator | permissions.IsAdminUser,
+            ]
 
         return [permission() for permission in permission_classes]
 
     def perform_create(self, serializer):
         """Автоматически привязываем курс к текущему пользователю"""
         serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        """Переопределяем метод обновления для отправки уведомлений."""
+        course = serializer.save()
+        send_course_update_notification.delay(course.id)
 
     def get_queryset(self):
         """
@@ -65,7 +77,10 @@ class LessonListView(generics.ListAPIView):
     """
 
     serializer_class = LessonSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrModerator | permissions.IsAdminUser]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsOwnerOrModerator | permissions.IsAdminUser,
+    ]
 
     def get_queryset(self):
         """
@@ -87,7 +102,10 @@ class LessonRetrieveView(generics.RetrieveAPIView):
     """
 
     serializer_class = LessonSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrModerator | permissions.IsAdminUser]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsOwnerOrModerator | permissions.IsAdminUser,
+    ]
 
     def get_queryset(self):
         """
@@ -123,7 +141,10 @@ class LessonUpdateView(generics.UpdateAPIView):
     """
 
     serializer_class = LessonSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrModerator | permissions.IsAdminUser]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsOwnerOrModerator | permissions.IsAdminUser,
+    ]
 
     def get_queryset(self):
         """
@@ -138,6 +159,11 @@ class LessonUpdateView(generics.UpdateAPIView):
 
         return Lesson.objects.filter(owner=user)
 
+    def perform_update(self, serializer):
+        """Автоматически привязываем урок к текущему пользователю и отправляем уведомление"""
+        lesson = serializer.save()
+        send_lesson_update_notification.delay(lesson.id, lesson.course.id)
+
 
 class LessonDestroyView(generics.DestroyAPIView):
     """
@@ -145,7 +171,10 @@ class LessonDestroyView(generics.DestroyAPIView):
     """
 
     serializer_class = LessonSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwner | permissions.IsAdminUser]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsOwner | permissions.IsAdminUser,
+    ]
 
     def get_queryset(self):
         """
@@ -309,6 +338,7 @@ class SubscriptionCreateView(generics.CreateAPIView):
     """
     Создание подписки на курс
     """
+
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -321,6 +351,7 @@ class SubscriptionDestroyView(generics.DestroyAPIView):
     """
     Удаление подписки на курс
     """
+
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -333,9 +364,9 @@ class SubscriptionListView(generics.ListAPIView):
     """
     Список подписок пользователя
     """
+
     serializer_class = SubscriptionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return Subscription.objects.filter(user=self.request.user, is_active=True)
-      

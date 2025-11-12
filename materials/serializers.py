@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, Lesson, Payment
+from .models import Course, Lesson, Payment, Subscription
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -75,4 +75,10 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return validated_data
-      
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = ["id", "user", "course", "subscribed_at", "is_active"]
+        read_only_fields = ["user", "subscribed_at"]

@@ -42,9 +42,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "first_name",
-                    models.CharField(
-                        blank=True, max_length=150, verbose_name="имя"
-                    ),
+                    models.CharField(blank=True, max_length=150, verbose_name="имя"),
                 ),
                 (
                     "last_name",
@@ -64,14 +62,16 @@ class Migration(migrations.Migration):
                     "is_active",
                     models.BooleanField(
                         default=True,
-                        help_text="Определяет, следует ли считать этого пользователя активным. Снимите этот флажок вместо удаления учетных записей.",
+                        help_text="Определяет, следует ли считать этого пользователя "
+                        "активным. Снимите этот флажок вместо удаления учетных записей.",
                         verbose_name="активный",
                     ),
                 ),
                 (
                     "date_joined",
                     models.DateTimeField(
-                        default=django.utils.timezone.now, verbose_name="дата регистрации"
+                        default=django.utils.timezone.now,
+                        verbose_name="дата регистрации",
                     ),
                 ),
                 (
@@ -105,7 +105,8 @@ class Migration(migrations.Migration):
                     "groups",
                     models.ManyToManyField(
                         blank=True,
-                        help_text="Группы, к которым принадлежит этот пользователь. Пользователь получит все разрешения, предоставленные каждой из своих групп.",
+                        help_text="Группы, к которым принадлежит этот пользователь. "
+                        "Пользователь получит все разрешения, предоставленные каждой из своих групп.",
                         related_name="user_set",
                         related_query_name="user",
                         to="auth.group",
@@ -130,4 +131,3 @@ class Migration(migrations.Migration):
             },
         ),
     ]
-    
